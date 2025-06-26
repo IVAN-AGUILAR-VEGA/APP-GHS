@@ -18,10 +18,25 @@ st.set_page_config(page_title="Gestión clínica", layout="wide")
 # Funciones de carga y guardado
 @st.cache_data
 def cargar_agenda():
+    """Cargar la agenda desde ``agenda.csv`` asegurando las columnas requeridas."""
+    required_cols = [
+        "Participante",
+        "Fecha",
+        "Hora",
+        "Sesión",
+        "Tipo de sesión",
+        "Secuencia",
+    ]
     try:
-        return pd.read_csv("agenda.csv")
+        agenda = pd.read_csv("agenda.csv")
+        agenda.columns = agenda.columns.str.strip()
+        for col in required_cols:
+            if col not in agenda.columns:
+                agenda[col] = ""
+        agenda = agenda[required_cols]
+        return agenda
     except FileNotFoundError:
-        return pd.DataFrame(columns=["Participante", "Fecha", "Hora", "Sesión", "Tipo de sesión", "Secuencia"])
+        return pd.DataFrame(columns=required_cols)
 
 def guardar_agenda(df):
     df.to_csv("agenda.csv", index=False)
